@@ -675,59 +675,61 @@
     </form>
   </div>
   <script>
-    var urlInput = document.getElementById('jiraURL');
-    var ticketPrefixInput = document.getElementById('ticketPrefix');
-    var sourceArea = document.getElementById('source');
-    var linkElement = document.getElementById('link');
+    (function() {
+      var urlInput = document.getElementById('jiraURL');
+      var ticketPrefixInput = document.getElementById('ticketPrefix');
+      var sourceArea = document.getElementById('source');
+      var linkElement = document.getElementById('link');
 
-    var updateTargetUrl = function() {
-      var baseUrl = urlInput.value ? urlInput.value.replace(/\/+$/, '') : null;
-      var jiraTicketPrefix = ticketPrefixInput.value ? ticketPrefixInput.value.replace(/-+$/, '') : null;
-      var jiraTicketRegex = jiraTicketPrefix ? new RegExp(jiraTicketPrefix + '-\\d+', 'gi') : null;
-      var ticketIds = sourceArea.value ? sourceArea.value.match(jiraTicketRegex) : null;
-      var targetUrl = '';
-      if (baseUrl && jiraTicketRegex && ticketIds) {
-        targetUrl = baseUrl + '/issues/?jql=' + encodeURIComponent('key in (' + ticketIds.join() + ')');
+      var updateTargetUrl = function() {
+        var baseUrl = urlInput.value ? urlInput.value.replace(/\/+$/, '') : null;
+        var jiraTicketPrefix = ticketPrefixInput.value ? ticketPrefixInput.value.replace(/-+$/, '') : null;
+        var jiraTicketRegex = jiraTicketPrefix ? new RegExp(jiraTicketPrefix + '-\\d+', 'gi') : null;
+        var ticketIds = sourceArea.value ? sourceArea.value.match(jiraTicketRegex) : null;
+        var targetUrl = '';
+        if (baseUrl && jiraTicketRegex && ticketIds) {
+          targetUrl = baseUrl + '/issues/?jql=' + encodeURIComponent('key in (' + ticketIds.join() + ')');
+        }
+        linkElement.href = targetUrl;
+        if (targetUrl) {
+          linkElement.innerHTML = 'Your JIRA link';
+        } else {
+          linkElement.innerHTML = '';
+        }
       }
-      linkElement.href = targetUrl;
-      if (targetUrl) {
-        linkElement.innerHTML = 'Your JIRA link';
-      } else {
-        linkElement.innerHTML = '';
-      }
-    }
 
-    var storageAvailable = 'localStorage' in window && window['localStorage'] !== null;
-    if (storageAvailable) {
-      urlInput.value = localStorage.getItem('jira.url');
-      ticketPrefixInput.value = localStorage.getItem('jira.ticket-prefix');
-    }
-    var updatePreferences = function() {
+      var storageAvailable = 'localStorage' in window && window['localStorage'] !== null;
       if (storageAvailable) {
-        localStorage.setItem('jira.url', urlInput.value);
-        localStorage.setItem('jira.ticket-prefix', ticketPrefixInput.value);
+        urlInput.value = localStorage.getItem('jira.url');
+        ticketPrefixInput.value = localStorage.getItem('jira.ticket-prefix');
       }
+      var updatePreferences = function() {
+        if (storageAvailable) {
+          localStorage.setItem('jira.url', urlInput.value);
+          localStorage.setItem('jira.ticket-prefix', ticketPrefixInput.value);
+        }
+        updateTargetUrl();
+      }
+
+      var updateHints = function() {
+        var jiraTicketPrefix = ticketPrefixInput.value ? ticketPrefixInput.value.replace(/-+$/, '') : 'EXJ';
+        sourceArea.placeholder = "Arbitrary text containing ticket keys, e.g. " + jiraTicketPrefix + "-1050"
+      }
+      var addInputEventListener = function(element, listener) {
+        if (element.addEventListener) { // event handling code for sane browsers
+          element.addEventListener('input', listener, false);
+        } else if (element.attachEvent) { // IE-specific event handling
+          element.attachEvent('onpropertychange', listener);
+        }
+      }
+
+      addInputEventListener(urlInput, updatePreferences);
+      addInputEventListener(ticketPrefixInput, updatePreferences);
+      addInputEventListener(ticketPrefixInput, updateHints);
+      addInputEventListener(sourceArea, updateTargetUrl);
+      updateHints();
       updateTargetUrl();
-    }
-
-    var updateHints = function() {
-      var jiraTicketPrefix = ticketPrefixInput.value ? ticketPrefixInput.value.replace(/-+$/, '') : 'EXJ';
-      sourceArea.placeholder = "Arbitrary text containing ticket keys, e.g. " + jiraTicketPrefix + "-1050"
-    }
-    var addInputEventListener = function(element, listener) {
-      if (element.addEventListener) { // event handling code for sane browsers
-        element.addEventListener('input', listener, false);
-      } else if (element.attachEvent) { // IE-specific event handling
-        element.attachEvent('onpropertychange', listener);
-      }
-    }
-
-    addInputEventListener(urlInput, updatePreferences);
-    addInputEventListener(ticketPrefixInput, updatePreferences);
-    addInputEventListener(ticketPrefixInput, updateHints);
-    addInputEventListener(sourceArea, updateTargetUrl);
-    updateHints();
-    updateTargetUrl();
+    })();
   </script>
 </body>
 </html>
