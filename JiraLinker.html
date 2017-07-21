@@ -605,6 +605,16 @@
     .float-right {
       float: right;
     }
+
+    /* End of Miligram CSS framework */
+
+    input[type='text'] {
+      font-family: monospace;
+    }
+
+    textarea.main {
+      height: 10em;
+    }
   </style>
 </head>
 <body>
@@ -615,8 +625,12 @@
                 <h4>Jira Linker</h4>
                 <form>
                     <fieldset>
-                        <label for="commentField">Ticket IDs:</label>
-                        <textarea placeholder="Insert your JIRA ticket IDs here in any form (with line breaks, tabs, commas, whatever)" id="source"></textarea>
+                        <label for="jiraURL">Jira URL</label>
+                        <input id="jiraURL" type="text" placeholder="http://example.com/jira">
+                        <label for="ticketPrefix">Ticket prefix</label>
+                        <input id="ticketPrefix" type="text" placeholder="EXJ">
+                        <label for="source">Text with ticket keys</label>
+                        <textarea id="source" class="main" placeholder=""></textarea>
                         <p><a id="link" href="#"></a></p>
                     </fieldset>
                 </form>
@@ -625,28 +639,59 @@
         </div>
     </div>
     <script>
-        var JIRA_URL = 'http://example.com/jira';
-        var JIRA_TICKET_REGEX = /EXJ-\d+/gi;
+        var urlInput = document.getElementById('jiraURL');
+        var ticketPrefixInput = document.getElementById('ticketPrefix');
         var sourceArea = document.getElementById('source');
         var linkElement = document.getElementById('link');
-        var updateJiraLink = function() {
-            var jiraLink = '';
-            ticketIds = sourceArea.value.match(JIRA_TICKET_REGEX);
-            if (ticketIds) {
-                jiraLink = JIRA_URL + 'issues/?jql=' + encodeURIComponent('key in (' + ticketIds.join() + ')');
+
+        var updateTargetUrl = function() {
+            var baseUrl = urlInput.value ? urlInput.value.replace(/\/+$/, '') : null;
+            var jiraTicketPrefix = ticketPrefixInput.value ? ticketPrefixInput.value.replace(/-+$/, '') : null;
+            var jiraTicketRegex = jiraTicketPrefix ? new RegExp(jiraTicketPrefix + '-\\d+', 'gi') : null;
+            var ticketIds = sourceArea.value ? sourceArea.value.match(jiraTicketRegex) : null;
+            var targetUrl = '';
+            if (baseUrl && jiraTicketRegex && ticketIds) {
+                targetUrl = baseUrl + '/issues/?jql=' + encodeURIComponent('key in (' + ticketIds.join() + ')');
             }
-            linkElement.href = jiraLink;
-            if (jiraLink) {
+            linkElement.href = targetUrl;
+            if (targetUrl) {
                 linkElement.innerHTML = 'Your JIRA link';
             } else {
                 linkElement.innerHTML = '';
             }
         }
-        if (sourceArea.addEventListener) { // event handling code for sane browsers
-            sourceArea.addEventListener('input', updateJiraLink, false);
-        } else if (sourceArea.attachEvent) { // IE-specific event handling
-            sourceArea.attachEvent('onpropertychange', updateJiraLink);
+
+        var storageAvailable = 'localStorage' in window && window['localStorage'] !== null;
+        if (storageAvailable) {
+            urlInput.value = localStorage.getItem('jira.url');
+            ticketPrefixInput.value = localStorage.getItem('jira.ticket-prefix');
         }
+        var updatePreferences = function() {
+            if (storageAvailable) {
+                localStorage.setItem('jira.url', urlInput.value);
+                localStorage.setItem('jira.ticket-prefix', ticketPrefixInput.value);
+            }
+            updateTargetUrl();
+        }
+
+        var updateHints = function() {
+            var jiraTicketPrefix = ticketPrefixInput.value ? ticketPrefixInput.value.replace(/-+$/, '') : 'EXJ';
+            sourceArea.placeholder = "Arbitrary text containing ticket keys, e.g. " + jiraTicketPrefix + "-1050"
+        }
+        var addInputEventListener = function(element, listener) {
+            if (element.addEventListener) { // event handling code for sane browsers
+                element.addEventListener('input', listener, false);
+            } else if (element.attachEvent) { // IE-specific event handling
+                element.attachEvent('onpropertychange', listener);
+            }
+        }
+
+        addInputEventListener(urlInput, updatePreferences);
+        addInputEventListener(ticketPrefixInput, updatePreferences);
+        addInputEventListener(ticketPrefixInput, updateHints);
+        addInputEventListener(sourceArea, updateTargetUrl);
+        updateHints();
+        updateTargetUrl();
     </script>
 </body>
 </html>
