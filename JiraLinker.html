@@ -435,7 +435,7 @@
           align-self: center;
     }
 
-    @media (min-width: 40rem) {
+    @media (min-width: 60rem) {
       .row {
         flex-direction: row;
         margin-left: -1.0rem;
@@ -614,29 +614,40 @@
 
     textarea.main {
       height: 10em;
+      resize: none;
     }
   </style>
 </head>
 <body>
     <div class="container">
-        <div class="row">
-            <div class="column column-25"></div>
-            <div class="column">
-                <h4>Jira Linker</h4>
-                <form>
-                    <fieldset>
-                        <label for="jiraURL">Jira URL</label>
-                        <input id="jiraURL" type="text" placeholder="http://example.com/jira">
-                        <label for="ticketPrefix">Ticket prefix</label>
-                        <input id="ticketPrefix" type="text" placeholder="EXJ">
-                        <label for="source">Text with ticket keys</label>
-                        <textarea id="source" class="main" placeholder=""></textarea>
-                        <p><a id="link" href="#"></a></p>
-                    </fieldset>
-                </form>
+        <form>
+            <div class="row">
+                <div class="column column-25"></div>
+                <div class="column"><h4>Jira Linker</h4></div>
+                <div class="column column-25"></div>
             </div>
-            <div class="column column-25"></div>
-        </div>
+            <div class="row">
+                <div class="column column-25"></div>
+                <div class="column">
+                    <label for="jiraURL">Jira URL</label>
+                    <input id="jiraURL" type="text" placeholder="http://example.com/jira">
+                </div>
+                <div class="column">
+                    <label for="ticketPrefix">Ticket prefix</label>
+                    <input id="ticketPrefix" type="text" placeholder="EXJ">
+                </div>
+                <div class="column column-25"></div>
+            </div>
+            <div class="row">
+                <div class="column column-25"></div>
+                <div class="column">
+                    <label for="source">Text with ticket keys</label>
+                    <textarea id="source" class="main" placeholder=""></textarea>
+                    <p><a id="link" href="#"></a></p>
+                </div>
+                <div class="column column-25"></div>
+            </div>
+        </form>
     </div>
     <script>
         var urlInput = document.getElementById('jiraURL');
