@@ -18,6 +18,10 @@ Version 1.4:
 <a href="http://jira.example.com/issues/?jql=key%20in%20(APP-1010%2CAPP-1015%2CAPP-1017)">Your JIRA link</a>
 ```
 
+## Live demo
+
+https://vvzh.github.io/jiralinker/JiraLinker.html
+
 ## Features
 
  - Single HTML file with no external dependencies.
